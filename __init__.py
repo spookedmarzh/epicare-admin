@@ -70,6 +70,8 @@ def upload_pfp():
     if mime_type not in ['image/png', 'image/jpeg']:
         return jsonify({'error': 'Only JPEG and PNG images are allowed'}), 400
     
+    print('test')
+    
     # user_id = get_current_user_id()  # You must define this
     # filename = f"user_{user_id}.{kind.extension}"
     # save_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename))
