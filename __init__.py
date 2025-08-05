@@ -1,17 +1,23 @@
-'''import classes'''
-from accounts.admin import Admin
-
-'''imports'''
+# Standard library imports
 import os
-import shelve
-import magic
 import re
-from flask import Flask, render_template, request, jsonify, redirect, flash, url_for
+import shelve
+from datetime import timedelta
+
+# Third-party library imports
+from flask import Flask, render_template, request, jsonify, redirect, flash, url_for, session
+import magic
+
+# Local application imports
+from accounts.admin import Admin
 
 app = Flask(__name__)
 app.secret_key = 'qwfgsgs23124'
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads', 'profiles') #path to save pfps to
 app.config['MAX_CONTENT_LENGTH'] = 2*1024*1024 #2MB file limit
+
+# set permanent session lifetime to 70 days
+app.permanent_session_lifetime = timedelta(days=70)
 
 ADMIN_SHELVE_NAME = 'admin_accounts.db' # shelve file
 
@@ -38,11 +44,25 @@ def is_strong_password(password):
         return False
     return True
 
+def get_current_user():
+    user_email = session.get('email')
+    if not user_email:
+        return None
+
+    with shelve.open('admin_accounts.db') as db:
+        user = db.get(user_email)
+
+    return user
+
 @app.route('/')
 def home():
     '''Home/Dashboard page (page user logs into)'''
 
-    return render_template('home.html')
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+
+    return render_template('home.html', user=user)
 
 @app.route('/reset-password-mail')
 def check_mail():
@@ -50,9 +70,27 @@ def check_mail():
 
     return render_template('check-mail.html')
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     '''login page'''
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        remember =  request.form.get('remember') # 'on' if checkbox is checked
+
+        with shelve.open(ADMIN_SHELVE_NAME) as db:
+            if email in db:
+                admin = db[email]
+                if admin.get_password() == password:
+                    session['email'] = email
+                    session.permanent = bool(remember)
+                    flash('Login successful', 'success')
+                    return redirect(url_for('home'))
+                else:
+                    flash('Incorrect password.', 'danger')
+            else:
+                flash('Email not found.', 'danger')
 
     return render_template('login.html')
 
@@ -90,7 +128,7 @@ def register():
             # create new admin user
             new_admin = Admin(username=username, email=email, password=password, job='Admin')
 
-            db[username] = new_admin
+            db[email] = new_admin
 
         flash('Admin account created successfully!', 'success')
         return redirect(url_for('login'))
@@ -124,7 +162,7 @@ def upload_pfp():
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
-    
+
     file_bytes = file.read(2048)  # 2KB is usually enough
     file.seek(0)  # Reset pointer for saving
 
@@ -132,7 +170,7 @@ def upload_pfp():
 
     if mime_type not in ['image/png', 'image/jpeg']:
         return jsonify({'error': 'Only JPEG and PNG images are allowed'}), 400
-    
+
     # user_id = get_current_user_id()  # You must define this
     # filename = f"user_{user_id}.{kind.extension}"
     # save_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename))
