@@ -1,14 +1,37 @@
 '''imports'''
-from flask import Flask, render_template, request, jsonify
-from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, jsonify, redirect, flash, url_for
 import os
+import shelve
 import magic
+import re
 
 app = Flask(__name__)
+app.secret_key = 'qwfgsgs23124'
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads', 'profiles') #path to save pfps to
 app.config['MAX_CONTENT_LENGTH'] = 2*1024*1024 #2MB file limit
 
+from accounts.admin import Admin
+
+ADMIN_SHELVE_NAME = 'admin_accounts.db' # shelve file
+
+ALLOWED_ADMIN_EMAILS = [
+    "mockmock582@gmail.com"
+]
+
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+
+# Functions
+def is_valid_email(email):
+    email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return re.match(email_regex, email)
+
+def is_strong_password(password):
+    if (len(password) < 8): # check for atleast 8 length
+        return False
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password): # check for atleast one special char
+        return False
+    return True
 
 @app.route('/')
 def home():
@@ -28,9 +51,44 @@ def login():
 
     return render_template('login.html')
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     '''register page'''
+
+    if request.method == "POST":
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        if not is_valid_email(email):
+            flash('Invalid email format.', 'danger')
+            return redirect(url_for('register'))
+        
+        if not is_strong_password(password):
+            flash('Password must be at least 8 characters long ' \
+            'and a special character.')
+            return redirect(url_for('register'))
+
+
+        if email not in ALLOWED_ADMIN_EMAILS:
+            flash("Email not authorized to register as admin", "danger")
+            return redirect(url_for("register"))
+
+        username = email.split('@')[0]
+
+        with shelve.open(ADMIN_SHELVE_NAME) as db:
+            
+            # check if user exists
+            if username in db:
+                flash('User already exists. Please Login instead.', 'warning')
+                return redirect(url_for('register'))
+
+            # create new admin user
+            new_admin = Admin(username=username, email=email, password=password, job='Admin')
+
+            db[username] = new_admin
+
+        flash('Admin account created successfully!', 'success')
+        return redirect(url_for('login'))
 
     return render_template('register.html')
 
