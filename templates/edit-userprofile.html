@@ -291,7 +291,7 @@
                 <h5>File Upload</h5>
               </div>
               <div class="card-body">
-                <form action="../assets/json/file-upload.php" class="dropzone">
+                <form action="{{ url_for('upload_pfp') }}" class="dropzone" method="post" enctype="multipart/form-data">
                   <div class="fallback">
                     <input name="file" type="file" multiple>
                   </div>
