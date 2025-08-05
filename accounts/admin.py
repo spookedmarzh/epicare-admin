@@ -1,7 +1,7 @@
 from .user import User
 
 class Admin(User):
-    DEFAULT_PROFILE_PIC = '../static/uploads/default pfp.jpeg'
+    DEFAULT_PROFILE_PIC = 'uploads/default pfp.jpg'
 
     def __init__(self, username, email, password, job):
         super().__init__(username, email, password)

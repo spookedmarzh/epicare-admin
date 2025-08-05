@@ -121,12 +121,12 @@ def register():
         with shelve.open(ADMIN_SHELVE_NAME) as db:
 
             # check if user exists
-            if username in db:
+            if email in db:
                 flash('User already exists. Please Login instead.', 'warning')
                 return redirect(url_for('register'))
 
             # create new admin user
-            new_admin = Admin(username=username, email=email, password=password, job='Admin')
+            new_admin = Admin(username=username, email=email, password=password, job='Administrator')
 
             db[email] = new_admin
 
