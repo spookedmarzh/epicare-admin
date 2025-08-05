@@ -54,6 +54,8 @@
         <div class="auth-header">
           <h3><span class="fw-bolder text-primary">Epicare</span></h3>
         </div>
+
+        <!-- for flash messsages -->
         <div style="position: fixed; top: 20px; right: 20px; z-index: 1050; min-width: 300px;">
           {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -66,6 +68,8 @@
             {% endif %}
           {% endwith %}
         </div>
+
+        <!-- form start -->
         <div class="card my-5">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-end mb-4">
