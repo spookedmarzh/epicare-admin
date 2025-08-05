@@ -1,16 +1,17 @@
+'''import classes'''
+from accounts.admin import Admin
+
 '''imports'''
-from flask import Flask, render_template, request, jsonify, redirect, flash, url_for
 import os
 import shelve
 import magic
 import re
+from flask import Flask, render_template, request, jsonify, redirect, flash, url_for
 
 app = Flask(__name__)
 app.secret_key = 'qwfgsgs23124'
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads', 'profiles') #path to save pfps to
 app.config['MAX_CONTENT_LENGTH'] = 2*1024*1024 #2MB file limit
-
-from accounts.admin import Admin
 
 ADMIN_SHELVE_NAME = 'admin_accounts.db' # shelve file
 
@@ -23,11 +24,15 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Functions
 def is_valid_email(email):
+    '''check for email validity using regex'''
+
     email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return re.match(email_regex, email)
 
 def is_strong_password(password):
-    if (len(password) < 8): # check for atleast 8 length
+    '''check for password validity'''
+
+    if len(password) < 8: # check for atleast 8 length
         return False
     if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password): # check for atleast one special char
         return False
@@ -76,7 +81,7 @@ def register():
         username = email.split('@')[0]
 
         with shelve.open(ADMIN_SHELVE_NAME) as db:
-            
+
             # check if user exists
             if username in db:
                 flash('User already exists. Please Login instead.', 'warning')
