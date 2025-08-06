@@ -93,6 +93,13 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/logout')
+def logout():
+    '''logs out the current user'''
+
+    session.clear()
+    return redirect(url_for('login'))
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     '''register page'''
