@@ -34,6 +34,10 @@
 </head>
 <!-- [Head] end -->
 
+<!-- page-specific-JS -->
+    {% block scripts %}
+    {% endblock %}
+
 <!-- [Body] Start -->
 
 <body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
@@ -58,16 +62,20 @@
 
     <!-- navbar -->
     {% block navbar %}
-        {% include 'navbar.html' %}
+        {% include 'partials/navbar.html' %}
     {% endblock %}
 
     <!-- main content -->
     {% block content %}
     {% endblock %}
 
+    <!-- footer -->
+    {% block footer %}
+        {% include 'partials/footer.html' %}
+    {% endblock %}
+
 
     <!-- JS Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/plugins/popper.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/plugins/simplebar.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/plugins/bootstrap.min.js') }}"></script>

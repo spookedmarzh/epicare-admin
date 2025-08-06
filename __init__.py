@@ -85,7 +85,6 @@ def login():
                 if admin.get_password() == password:
                     session['email'] = email
                     session.permanent = bool(remember)
-                    flash('Login successful', 'success')
                     return redirect(url_for('home'))
                 else:
                     flash('Incorrect password.', 'danger')
@@ -138,14 +137,20 @@ def register():
 @app.route('/user-pwid')
 def user_pwid():
     '''pwid table csv page'''
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
 
-    return render_template('user-pwid.html')
+    return render_template('user-pwid.html', user=user)
 
 @app.route('/user-caretaker')
 def user_caretaker():
     '''caretaker table csv page'''
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
 
-    return render_template('user-caretaker.html')
+    return render_template('user-caretaker.html', user=user)
 
 @app.route('/edit-userprofile')
 def edit_userprofile():
