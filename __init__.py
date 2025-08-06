@@ -54,21 +54,9 @@ def get_current_user():
 
     return user
 
-@app.route('/')
-def home():
-    '''Home/Dashboard page (page user logs into)'''
+# ─────────── Routes ───────────
 
-    user = get_current_user()
-    if not user:
-        return redirect(url_for('login'))
-
-    return render_template('home.html', user=user)
-
-@app.route('/reset-password-mail')
-def check_mail():
-    '''After user submits email to get password change'''
-
-    return render_template('check-mail.html')
+# ─────────── Auth Routes (Unauthenticated) ───────────
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -141,6 +129,25 @@ def register():
 
     return render_template('register.html')
 
+
+@app.route('/reset-password-mail')
+def check_mail():
+    '''After user submits email to get password change'''
+
+    return render_template('check-mail.html')
+
+# ─────────── Content Routes (Authenticated) ───────────
+
+@app.route('/')
+def home():
+    '''Home/Dashboard page (page user logs into)'''
+
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+
+    return render_template('home.html', user=user)
+
 @app.route('/user-pwid')
 def user_pwid():
     '''pwid table csv page'''
@@ -190,7 +197,6 @@ def upload_pfp():
     # file.save(save_path)
 
     # return jsonify({'success': True, 'filename': filename}), 200
-# Add more routes as needed
 
 if __name__ == '__main__':
     app.run(debug=True)
