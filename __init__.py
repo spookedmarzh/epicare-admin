@@ -6,15 +6,31 @@ from datetime import timedelta
 
 # Third-party library imports
 from flask import Flask, render_template, request, jsonify, redirect, flash, url_for, session
+from flask_mail import Mail, Message
 import magic
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from dotenv import load_dotenv
 
 # Local application imports
 from accounts.admin import Admin
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'qwfgsgs23124'
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads', 'profiles') #path to save pfps to
 app.config['MAX_CONTENT_LENGTH'] = 2*1024*1024 #2MB file limit
+app.config.update(
+    MAIL_SERVER=str(os.getenv('MAIL_SERVER')),
+    MAIL_PORT=587,
+    MAIL_USE_TLS=True,
+    MAIL_USERNAME=str(os.getenv('MAIL_USERNAME')),
+    MAIL_PASSWORD=str(os.getenv('MAIL_PASSWORD')), # SMTP key
+    MAIL_DEFAULT_SENDER=str(os.getenv('MAIL_DEFAULT_SENDER'))
+)
+
+# set up mail
+mail = Mail(app)
 
 # set permanent session lifetime to 70 days
 app.permanent_session_lifetime = timedelta(days=70)
@@ -22,13 +38,38 @@ app.permanent_session_lifetime = timedelta(days=70)
 ADMIN_SHELVE_NAME = 'admin_accounts.db' # shelve file
 
 ALLOWED_ADMIN_EMAILS = [
-    "mockmock582@gmail.com"
+    "mockmock582@gmail.com",
+    "epicaresystem@gmail.com"
 ]
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+serializer = URLSafeTimedSerializer(app.secret_key)
 
 # Functions
+def send_mail(subject, recipients, body, html=None):
+    '''
+    Sends an email using Flask-Mail.
+    
+    :param subject: Email subject
+    :param recipients: List of recipient emails
+    :param body: Plain text body
+    :param html: Optional HTML body
+    :param sender: Optional override sender
+    '''
+    msg = Message(
+        subject=subject,
+        recipients=recipients,
+        sender='MS_mv3hYD@test-ywj2lpnd9ypg7oqz.mlsender.net'
+    )
+    msg.body = body
+    if html:
+        msg.html=html
+    mail.send(msg)
+    print('success')
+
+
+
 def is_valid_email(email):
     '''check for email validity using regex'''
 
@@ -99,7 +140,7 @@ def register():
         if not is_valid_email(email):
             flash('Invalid email format.', 'danger')
             return redirect(url_for('register'))
-        
+
         if not is_strong_password(password):
             flash('Password must be at least 8 characters long ' \
             'and a special character.')
@@ -120,7 +161,8 @@ def register():
                 return redirect(url_for('register'))
 
             # create new admin user
-            new_admin = Admin(username=username, email=email, password=password, job='Administrator')
+            new_admin = Admin(username=username, email=email,
+                              password=password, job='Administrator')
 
             db[email] = new_admin
 
@@ -130,11 +172,77 @@ def register():
     return render_template('register.html')
 
 
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    '''page to submit email to send password reset link'''
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+
+        with shelve.open(ADMIN_SHELVE_NAME) as db:
+            if email in db:
+                # Generates a token that will expire after time
+                token = serializer.dumps(email, salt='reset-password')
+
+                # Create reset link
+                reset_url = url_for('reset_password', token=token, _external=True)
+
+                subject = 'Reset Your Epicare Password'
+                body=f'Hi, you requested a password reset. Click the link below to reset your password:\n{reset_url}'
+
+                send_mail(subject, [email], body, html=render_template('partials/reset-password-email.html', reset_url=reset_url))
+
+        flash('Password reset link has been sent to the email', 'info')
+        return redirect(url_for('check_mail')) # redirect to check-mail page
+
+    return render_template('forgot-password.html')
+
+
 @app.route('/reset-password-mail')
 def check_mail():
     '''After user submits email to get password change'''
 
     return render_template('check-mail.html')
+
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    '''page to reset password after user clicks link in email'''
+
+    try:
+        # deserialize email from token, expire after 1 hour
+        email = serializer.loads(token, salt='reset-password', max_age=3600)
+
+    except SignatureExpired:
+        flash('The password reset link has expired.', 'danger')
+        return redirect(url_for('login'))
+    except BadSignature:
+        flash("Invalid reset link.", "danger")
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        if password != confirm_password:
+            flash('Passwords do not match', 'danger')
+            return render_template('reset-password.html', token=token)
+        
+        if not is_strong_password(password):
+            flash('Password must be at least 8 characters long ' \
+            'and a special character.')
+            return render_template('reset-password.html', token=token)
+        
+        with shelve.open(ADMIN_SHELVE_NAME, writeback=True) as db:
+            if email in db:
+                db[email].set_password(password)
+                flash('Password successfully updated.', 'success')
+                return redirect(url_for('login'))
+
+            else:
+                flash('User no longer exists', 'danger')
+
+    return render_template('reset-password.html')
 
 # ─────────── Content Routes (Authenticated) ───────────
 

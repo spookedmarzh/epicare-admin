@@ -1,105 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<!-- [Head] start -->
+{% extends "base.html" %}
 
-<head>
-  <title>Check Mail | Mantis Bootstrap 5 Admin Template</title>
-  <!-- [Meta] -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="Mantis is made using Bootstrap 5 design framework. Download the free admin template & use it for your project.">
-  <meta name="keywords" content="Mantis, Dashboard UI Kit, Bootstrap 5, Admin Template, Admin Dashboard, CRM, CMS, Bootstrap Admin Template">
-  <meta name="author" content="CodedThemes">
+{% block title %}Check your mail{% endblock %}
 
-  <!-- [Favicon] icon -->
-  <link rel="icon" href="{{ url_for('static', filename = 'images/favicon.svg') }}" type="image/x-icon"> <!-- [Google Font] Family -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" id="main-font-link">
-<!-- [Tabler Icons] https://tablericons.com -->
-<link rel="stylesheet" href="{{ url_for('static', filename='fonts/tabler-icons.min.css') }}">
-<!-- [Feather Icons] https://feathericons.com -->
-<link rel="stylesheet" href="{{ url_for('static', filename='fonts/feather.css') }}">
-<!-- [Font Awesome Icons] https://fontawesome.com/icons -->
-<link rel="stylesheet" href="{{ url_for('static', filename='fonts/fontawesome.css') }}">
-<!-- [Material Icons] https://fonts.google.com/icons -->
-<link rel="stylesheet" href="{{ url_for('static', filename='fonts/material.css') }}">
-<!-- [Template CSS Files] -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" id="main-style-link">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style-preset.css') }}">
+{% block navbar %}
+<!-- Override navbar block to nothing -->
+{% endblock %}
 
-</head>
-<!-- [Head] end -->
-<!-- [Body] Start -->
-
-<body>
-  <!-- [ Pre-loader ] start -->
-  <div class="loader-bg">
-    <div class="loader-track">
-      <div class="loader-fill"></div>
-    </div>
-  </div>
-  <!-- [ Pre-loader ] End -->
-
-  <div class="auth-main">
-    <div class="auth-wrapper v3">
-      <div class="auth-form">
-        <div class="auth-header">
-          <h3><span class="fw-bolder text-primary">Epicare</span></h3>
-        </div>
-        <div class="card my-5">
-          <div class="card-body">
-            <div class="mb-4">
-              <h3 class="mb-2"><b>Hi, Check Your Mail</b></h3>
-              <p class="text-muted">We have sent a password recover instructions to your email.</p>
-            </div>
-            <div class="d-grid mt-3">
-              <button type="button" class="btn btn-primary">Sign in</button>
-            </div>
+{% block content %}
+<div class="auth-main">
+  <div class="auth-wrapper v3">
+    <div class="auth-form">
+      <div class="auth-header">
+        <h3><span class="fw-bolder text-primary">Epicare</span></h3>
+      </div>
+      <div class="card my-5">
+        <div class="card-body">
+          <div class="mb-4">
+            <h3 class="mb-2"><b>Hi, Check Your Mail</b></h3>
+            <p class="text-muted">We have sent a password recover instructions to your email.</p>
+          </div>
+          <div class="d-grid mt-3">
+            <button type="button" class="btn btn-primary">Sign in</button>
           </div>
         </div>
-        <div class="auth-footer row">
-          <!-- <div class=""> -->
-          <div class="col my-1">
-            <p class="m-0">© 2025 Epicare, last updated 30 July 2025</p>
-          </div>
-          <!-- </div> -->
+      </div>
+      <div class="auth-footer row">
+        <!-- <div class=""> -->
+        <div class="col my-1">
+          <p class="m-0">© 2025 Epicare, last updated 30 July 2025</p>
         </div>
+        <!-- </div> -->
       </div>
     </div>
   </div>
-  <!-- [ Main Content ] end -->
-  <!-- Required Js -->
-<script src="{{ url_for('static', filename='js/plugins/popper.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/plugins/simplebar.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/plugins/bootstrap.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/fonts/custom-font.js') }}"></script>
-<script src="{{ url_for('static', filename='js/pcoded.js') }}"></script>
-<script src="{{ url_for('static', filename='js/plugins/feather.min.js') }}"></script>
-
-
-  
-  
-  
-  
-  <script>layout_change('light');</script>
-  
-  
-  
-  
-  <script>change_box_container('false');</script>
-  
-  
-  
-  <script>layout_rtl_change('false');</script>
-  
-  
-  <script>preset_change("preset-1");</script>
-  
-  
-  <script>font_change("Public-Sans");</script>
-  
-    
-</body>
-<!-- [Body] end -->
-
-</html>
+</div>
+<!-- [ Main Content ] end -->
+{% endblock %}
+{% block footer %}
+<!-- Override footer block to nothing -->
+{% endblock %}

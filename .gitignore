@@ -11,3 +11,13 @@ __pycache__/
 *.venv
 .env
 .venv
+
+# Shelve database files (platform dependent extensions)
+*.db
+*.dat
+*.bak
+*.dir
+
+# VS Code settings (optional, for team consistency)
+.vscode/
+
