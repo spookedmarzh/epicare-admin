@@ -16150,7 +16150,7 @@ pre[class*=language-] > code {
 }
 .pc-sidebar .pc-arrow {
   float: right;
-  display: inline-block;
+  display: block;
   transition: all 0.2s ease-in-out;
 }
 .pc-sidebar .pc-arrow > svg {
@@ -18617,7 +18617,7 @@ pre[class*=language-] > code {
 .profit-bar .mon-icon {
   padding: 20px;
   border-radius: 50px;
-  display: inline-block;
+  display: block;
   float: right;
 }
 .profit-bar .mon-icon svg {

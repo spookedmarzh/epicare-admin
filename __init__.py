@@ -55,7 +55,7 @@ serializer = URLSafeTimedSerializer(app.secret_key)
 
 # Functions
 def log_page_view(user=None):
-    with open('page_views.csv', mode='a', newline='') as file:
+    with open('page_views.csv', mode='a', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         user_type = 'Unknown'
         if user is not None:
