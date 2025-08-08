@@ -3,6 +3,7 @@ import os
 import re
 import shelve
 from datetime import timedelta
+import uuid
 
 # Third-party library imports
 from flask import Flask, render_template, request, jsonify, redirect, flash, url_for, session
@@ -10,6 +11,7 @@ from flask_mail import Mail, Message
 import magic
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
 
 # Local application imports
 from accounts.admin import Admin
@@ -274,37 +276,65 @@ def user_caretaker():
 
     return render_template('user-caretaker.html', user=user)
 
-@app.route('/edit-userprofile')
-def edit_userprofile():
-    '''edit user profile'''
+@app.route('/edit-profile', methods=['GET', 'POST'])
+def edit_profile():
+    '''edit user profile page'''
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+    
+    if request.method=='POST':
+        updated = False
 
-    return render_template('edit-userprofile.html')
+        # Username update
+        new_username = request.form.get('username', '').strip()
+        if new_username and new_username != user.get_username():
+            user.set_username(new_username)
+            updated = True
 
-@app.route('/upload', methods=['POST'])
-def upload_pfp():
-    '''handle user profile picture upload'''
+        # Profile picture update
+        file = request.files.get('profile_picture')
+        if file and file.filename.strip(): # checks if file exists and if filename is not empty
+            file_bytes = file.read(2048) # read the file
+            file.seek(0) # reset pointer after read
 
-    if 'file' not in request.files:
-        return jsonify({'error':'No file found'}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
+            mime_type = magic.from_buffer(file_bytes, mime=True)
+            allowed_types = ['image/jpeg', 'image/png'] # allow only jpeg and png files
 
-    file_bytes = file.read(2048)  # 2KB is usually enough
-    file.seek(0)  # Reset pointer for saving
+            if mime_type in allowed_types:
+                # sanitize filename to prevent unsafe files
+                filename = secure_filename(file.filename)
 
-    mime_type = magic.from_buffer(file_bytes, mime=True)
+                # unique filename to avoid conflict
+                unique_filename = f'{uuid.uuid4().hex}_{filename}'
 
-    if mime_type not in ['image/png', 'image/jpeg']:
-        return jsonify({'error': 'Only JPEG and PNG images are allowed'}), 400
+                # build the path where file will be saved
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
 
-    # user_id = get_current_user_id()  # You must define this
-    # filename = f"user_{user_id}.{kind.extension}"
-    # save_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename))
+                # save uploaded file to filesystem
+                file.save(file_path)
 
-    # file.save(save_path)
+                user.profile_picture = os.path.join('uploads', 'profiles', unique_filename).replace("\\", '/')
+                updated = True
+            else:
+                # if file type is invalid
+                flash('Only .jpeg and .png files are allowed', 'danger')
+                return redirect(url_for('edit_profile'))
+            
+        # save changes to shelve
+        if updated:
+            with shelve.open(ADMIN_SHELVE_NAME, writeback=True) as db:
+                db[user.get_email()] = user
+            flash('Profile updated successfully!', 'success')
 
-    # return jsonify({'success': True, 'filename': filename}), 200
+        else:
+            # no changes detected
+            flash('No changes were made', 'info')
 
+        #redirect to same page
+        return redirect(url_for('edit_profile'))
+    
+    # For GET requests, render template
+    return render_template('edit-userprofile.html', user=user)
 if __name__ == '__main__':
     app.run(debug=True)

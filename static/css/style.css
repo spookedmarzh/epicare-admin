@@ -16692,9 +16692,11 @@ pre[class*=language-] > code {
   height: 14px;
 }
 .pc-header .user-avtar {
+  height: 40px;
   width: 40px;
   margin-right: 10px;
   border-radius: 50%;
+  object-fit: cover; 
 }
 .pc-header .header-user-profile .pc-head-link {
   width: auto;
@@ -16706,8 +16708,10 @@ pre[class*=language-] > code {
   margin-right: 8px;
 }
 .pc-header .header-user-profile .pc-head-link .user-avtar {
+  height: 24px;
   width: 24px;
   transition: all 0.08s cubic-bezier(0.37, 0.24, 0.53, 0.99);
+  object-fit: cover; 
 }
 @media (max-width: 575.98px) {
   .pc-header .header-user-profile .pc-head-link {

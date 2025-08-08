@@ -17,6 +17,7 @@ __pycache__/
 *.dat
 *.bak
 *.dir
+static/uploads/profiles
 
 # VS Code settings (optional, for team consistency)
 .vscode/
