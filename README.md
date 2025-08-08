@@ -2,6 +2,7 @@
 - login/logout
 - register
 - forgot password mail reset
+- user profile (pfp/username) update
 
 ## Dependencies
 - flask
