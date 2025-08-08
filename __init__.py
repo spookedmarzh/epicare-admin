@@ -16,6 +16,7 @@ from werkzeug.utils import secure_filename
 
 # Local application imports
 from accounts.admin import Admin
+from utils.plot_utils import get_pageview_data
 
 load_dotenv()
 
@@ -278,7 +279,22 @@ def home():
         return redirect(url_for('login'))
     
     log_page_view(user) # log the page view
+
+
+
     return render_template('home.html', user=user)
+
+
+@app.route('/pageview-data')
+def pageview_data():
+    '''retrieve the chart data'''
+
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+    
+    data = get_pageview_data('page_views.csv')
+    return jsonify(data)
 
 
 @app.route('/user-pwid')
