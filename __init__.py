@@ -2,8 +2,9 @@
 import os
 import re
 import shelve
-from datetime import timedelta
+from datetime import timedelta, datetime
 import uuid
+import csv
 
 # Third-party library imports
 from flask import Flask, render_template, request, jsonify, redirect, flash, url_for, session
@@ -34,6 +35,10 @@ app.config.update(
 # set up mail
 mail = Mail(app)
 
+# csv file for page view logging
+LOG_FILE = 'page_views.csv'
+
+
 # set permanent session lifetime to 70 days
 app.permanent_session_lifetime = timedelta(days=70)
 
@@ -49,6 +54,16 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 serializer = URLSafeTimedSerializer(app.secret_key)
 
 # Functions
+def log_page_view(user=None):
+    with open('page_views.csv', mode='a', newline='') as file:
+        writer = csv.writer(file)
+        user_type = 'Unknown'
+        if user is not None:
+            user_type = user.get_user_type()
+
+        writer.writerow([datetime.now().isoformat(), user_type])
+
+
 def send_mail(subject, recipients, body, html=None):
     '''
     Sends an email using Flask-Mail.
@@ -71,12 +86,12 @@ def send_mail(subject, recipients, body, html=None):
     print('success')
 
 
-
 def is_valid_email(email):
     '''check for email validity using regex'''
 
     email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return re.match(email_regex, email)
+
 
 def is_strong_password(password):
     '''check for password validity'''
@@ -86,6 +101,7 @@ def is_strong_password(password):
     if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password): # check for atleast one special char
         return False
     return True
+
 
 def get_current_user():
     user_email = session.get('email')
@@ -122,6 +138,7 @@ def login():
             else:
                 flash('Email not found.', 'danger')
 
+    log_page_view() # log the page view
     return render_template('login.html')
 
 @app.route('/logout')
@@ -171,6 +188,7 @@ def register():
         flash('Admin account created successfully!', 'success')
         return redirect(url_for('login'))
 
+    log_page_view() # log the page view
     return render_template('register.html')
 
 
@@ -196,7 +214,8 @@ def forgot_password():
 
         flash('Password reset link has been sent to the email', 'info')
         return redirect(url_for('check_mail')) # redirect to check-mail page
-
+    
+    log_page_view() # log the page view
     return render_template('forgot-password.html')
 
 
@@ -204,6 +223,7 @@ def forgot_password():
 def check_mail():
     '''After user submits email to get password change'''
 
+    log_page_view() # log the page view
     return render_template('check-mail.html')
 
 
@@ -252,11 +272,14 @@ def reset_password(token):
 def home():
     '''Home/Dashboard page (page user logs into)'''
 
+
     user = get_current_user()
     if not user:
         return redirect(url_for('login'))
-
+    
+    log_page_view(user) # log the page view
     return render_template('home.html', user=user)
+
 
 @app.route('/user-pwid')
 def user_pwid():
@@ -265,7 +288,9 @@ def user_pwid():
     if not user:
         return redirect(url_for('login'))
 
+    log_page_view(user) # log the page view
     return render_template('user-pwid.html', user=user)
+
 
 @app.route('/user-caretaker')
 def user_caretaker():
@@ -274,7 +299,9 @@ def user_caretaker():
     if not user:
         return redirect(url_for('login'))
 
+    log_page_view(user) # log the page view
     return render_template('user-caretaker.html', user=user)
+
 
 @app.route('/edit-profile', methods=['GET', 'POST'])
 def edit_profile():
@@ -282,7 +309,7 @@ def edit_profile():
     user = get_current_user()
     if not user:
         return redirect(url_for('login'))
-    
+
     if request.method=='POST':
         updated = False
 
@@ -320,7 +347,7 @@ def edit_profile():
                 # if file type is invalid
                 flash('Only .jpeg and .png files are allowed', 'danger')
                 return redirect(url_for('edit_profile'))
-            
+
         # save changes to shelve
         if updated:
             with shelve.open(ADMIN_SHELVE_NAME, writeback=True) as db:
@@ -333,8 +360,13 @@ def edit_profile():
 
         #redirect to same page
         return redirect(url_for('edit_profile'))
-    
+
+    log_page_view(user) # log the page view
     # For GET requests, render template
     return render_template('edit-userprofile.html', user=user)
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)

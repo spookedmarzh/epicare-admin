@@ -523,6 +523,7 @@ button,
 [type=reset],
 [type=submit] {
   -webkit-appearance: button;
+  appearance: button;
 }
 button:not(:disabled),
 [type=button]:not(:disabled),
@@ -580,6 +581,7 @@ legend + * {
 
 [type=search] {
   -webkit-appearance: textfield;
+  appearance: textfield;
   outline-offset: -2px;
 }
 
@@ -602,6 +604,7 @@ legend + * {
 ::file-selector-button {
   font: inherit;
   -webkit-appearance: button;
+  appearance: button;
 }
 
 output {
@@ -15034,6 +15037,7 @@ strong {
   -webkit-text-fill-color: transparent;
   vertical-align: text-bottom;
   -webkit-background-clip: text;
+  background-clip: text;
 }
 .material-icons-two-tone.text-white {
   background-color: #fff;
