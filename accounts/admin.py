@@ -13,3 +13,6 @@ class Admin(User):
 
     def set_job(self, job):
         self.__job = job
+
+    def get_user_type(self):
+        return 'Admin'
