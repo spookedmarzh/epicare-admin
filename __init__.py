@@ -114,6 +114,22 @@ def get_current_user():
 
     return user
 
+def get_user_counts():
+    counts = {
+        'PWID': 0,
+        'Caretaker': 0
+    }
+
+    with shelve.open(ADMIN_SHELVE_NAME) as db:
+        for key in db:
+            user = db[key]
+            if user.get_user_type() == 'PWID':
+                counts['PWID'] += 1
+            elif user.get_user_type() == 'Caretaker':
+                counts['Caretaker'] += 1
+        
+        return counts
+
 # ─────────── Routes ───────────
 
 # ─────────── Auth Routes (Unauthenticated) ───────────
@@ -295,6 +311,12 @@ def pageview_data():
     
     data = get_pageview_data('page_views.csv')
     return jsonify(data)
+
+
+@app.route('/usercount-data')
+def usercount_data():
+    counts = get_user_counts()
+    return jsonify(counts)
 
 
 @app.route('/user-pwid')

@@ -6,7 +6,7 @@ def get_pageview_data(log_file_path):
     # plotting code
 
     today = datetime.now().date()
-    # yesterday = today - timedelta(days=1) !!! uncomment this after testing done
+    yesterday = today - timedelta(days=1)
 
     # defaultdict(int) automatically creates default values for missing keys
     counts = {
@@ -21,7 +21,7 @@ def get_pageview_data(log_file_path):
             ts = datetime.fromisoformat(row['timestamp']) # get timestamp
             user_type = row['user_type'].strip()
 
-            if ts.date() == today and user_type in counts: # !!! change to yesterday after testing done
+            if ts.date() == yesterday and user_type in counts:
                 hour = ts.hour
                 counts[user_type][hour] += 1
     
