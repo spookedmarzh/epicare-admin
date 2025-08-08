@@ -60,7 +60,7 @@ def send_mail(subject, recipients, body, html=None):
     msg = Message(
         subject=subject,
         recipients=recipients,
-        sender='MS_mv3hYD@test-ywj2lpnd9ypg7oqz.mlsender.net'
+        sender=str(os.getenv('MAIL_DEFAULT_SENDER'))
     )
     msg.body = body
     if html:
