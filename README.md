@@ -20,7 +20,7 @@ Template used is the Mantis Bootstrap 5 Admin Template from CodedThemes.
 - python-magic
 - itsdangerous
 - python-dotenv
-- Werkzeug
+- Werkzeug  
 (may be more that i missed)
 
 ## Notes:
