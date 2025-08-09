@@ -23,13 +23,13 @@ Template used is the Mantis Bootstrap 5 Admin Template from CodedThemes.
 - Werkzeug
 
 ## Notes
-##### make sure to have a .env file with the following format:
-MAIL_SERVER=
-MAIL_PORT=587
-MAIL_USE_TLS=True
-MAIL_USERNAME=
-MAIL_PASSWORD=
-MAIL_DEFAULT_SENDER=
+### make sure to have a .env file with the following format:
+MAIL_SERVER=  
+MAIL_PORT=587  
+MAIL_USE_TLS=True  
+MAIL_USERNAME=  
+MAIL_PASSWORD=  
+MAIL_DEFAULT_SENDER=  
 
-##### Create a file 'page_views.csv'
+###Create a file 'page_views.csv'
 timestamp,user_type --> put this in the first row of the file
