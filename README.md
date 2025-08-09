@@ -3,7 +3,7 @@ Admin Pages/Dashboards + Login/Register Pages for epicare [a webapp for persons 
 
 Template used is the Mantis Bootstrap 5 Admin Template from CodedThemes.
 
-## Features currently completed
+## Features currently completed:
 - login/logout
 - register
 - forgot password mail reset
@@ -14,16 +14,17 @@ Template used is the Mantis Bootstrap 5 Admin Template from CodedThemes.
 - added table for the PWID & Caretaker page with export to csv, excel and print option
 - Delete account
 
-## Dependencies (may be more that i missed)
+## Dependencies:
 - flask
 - flask_mail
 - python-magic
 - itsdangerous
 - python-dotenv
 - Werkzeug
+(may be more that i missed)
 
-## Notes
-### make sure to have a .env file with the following format:
+## Notes:
+#### Make sure to have a .env file with the following format:
 MAIL_SERVER=  
 MAIL_PORT=587  
 MAIL_USE_TLS=True  
@@ -31,5 +32,5 @@ MAIL_USERNAME=
 MAIL_PASSWORD=  
 MAIL_DEFAULT_SENDER=  
 
-###Create a file 'page_views.csv'  
+#### Create a file 'page_views.csv'  
 timestamp,user_type --> put this in the first row of the file
