@@ -2,13 +2,6 @@
 
 {% block title %}Edit user profile{% endblock %}
 
-{% block scripts %}
-<!-- [Page Specific JS] start -->
-<!-- file-upload Js -->
-<script src="{{ url_for('static', filename='js/plugins/dropzone-amd-module.min.js') }}"></script>
-<!-- [Page Specific JS] end -->
- {% endblock %}
-
 {% block content %}
 <!-- [ Header ] end -->
 <section class="pc-container">
@@ -20,13 +13,13 @@
           <div class="col-md-12">
             <ul class="breadcrumb">
               <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Home</a></li>
-              <li class="breadcrumb-item"><a href="javascript: void(0)">Profile</a></li>
-              <li class="breadcrumb-item" aria-current="page">User Profile</li>
+              <li class="breadcrumb-item"><a href="javascript: void(0)">Settings</a></li>
+              <li class="breadcrumb-item" aria-current="page">Delete Account</li>
             </ul>
           </div>
           <div class="col-md-12">
             <div class="page-header-title">
-              <h2 class="mb-0">User Profile</h2>
+              <h2 class="mb-0">Delete Account</h2>
             </div>
           </div>
         </div>
@@ -40,27 +33,27 @@
       <div class="col-sm-12">
         <div class="card">
           <div class="card-header">
-            <h5>Edit Userprofile</h5>
+            <h5>Delete Account</h5>
           </div>
           <div class="card-body">
-            <form action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data">
-                <!-- Profile picture -->
-                <div class="fallback">
-                  <label class="form-label">Profile Picture</label>
-                  <input type="file" name="profile_picture" class="form-control">
+            <form action="{{ url_for('delete_account') }}" method="POST" enctype="multipart/form-data">
+                <!-- password -->
+                <div class="form-group mb-3">
+                  <label class="form-label">Password</label>
+                  <input type="password" name="password" class="form-control" placeholder="Password">
                 </div>
 
                 <br>
 
-                <!-- Username -->
-                <div class="form-group">
-                  <label class="form-label">Username</label>
-                  <input type="text" name="username" class="form-control" value="{{ user.get_username() }}">
+                <!-- confirm_password -->
+                <div class="form-group mb-3">
+                  <label class="form-label">Confirm Password</label>
+                  <input type="password" name='confirm_password' class="form-control" placeholder="Confirm Password">
                 </div>
                 
                 <!-- Save Changes -->
                 <div class="text-center m-t-20">
-                  <button type='submit' class="btn btn-primary">Save Changes</button>
+                  <button type='submit' class="btn btn-primary">Delete Account</button>
                 </div>
             </form>
           </div>

@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 class User:
 
     def __init__(self, username, email, password):
@@ -6,6 +7,8 @@ class User:
         self.__username = username
         self.__email = email
         self.__password = password
+        self.page_views = 0
+        self.created_at = datetime.now()
 
     def get_user_id(self):
         return self.__user_id
@@ -27,3 +30,12 @@ class User:
 
     def set_email(self, email):
         self.__email = email
+
+    def log_page_view(self):
+        self.page_views += 1
+
+    def get_page_views(self):
+        return self.page_views
+      
+    def get_creation_date(self):
+        return self.created_at

@@ -110,8 +110,10 @@ def get_current_user():
     if not user_email:
         return None
 
-    with shelve.open('admin_accounts.db') as db:
+    with shelve.open('admin_accounts.db', writeback=True) as db:
         user = db.get(user_email)
+        if user:
+            user.log_page_view() # logs page view for the user
 
     return user
 
@@ -138,7 +140,7 @@ def admin_required(f):
             # Reject if the user doesn't exist OR is not an Admin
             if not admin or admin.get_user_type() != 'Admin':
                 flash("You do not have permission to view this page.", "danger")
-                return redirect(url_for('home'))
+                return redirect(url_for('login'))
 
         # 3. If all checks pass, run the original route function
         return f(*args, **kwargs)
@@ -338,8 +340,6 @@ def home():
 
 
     user = get_current_user()
-    if not user:
-        return redirect(url_for('login'))
     
     log_page_view(user) # log the page view
 
@@ -364,10 +364,6 @@ def total_pageview_data():
 @admin_required
 def pageview_data():
     '''retrieve the chart data'''
-
-    user = get_current_user()
-    if not user:
-        return redirect(url_for('login'))
     
     data = get_pageview_data('page_views.csv')
     return jsonify(data)
@@ -390,11 +386,24 @@ def usercount_data():
 def user_pwid():
     '''pwid table csv page'''
     user = get_current_user()
-    if not user:
-        return redirect(url_for('login'))
+
+    users = []
+    with shelve.open(ADMIN_SHELVE_NAME) as db:
+        for key in db:
+            u = db[key]
+            # check if caretaker
+            if u.get_user_type() == 'PWID':
+                users.append(
+                    {
+                        'username': u.get_username(),
+                        'email': u.get_email(),
+                        'created_at': u.get_creation_date().strftime('%Y-%m-%d'), # format date
+                        'page_views': u.get_page_views()
+                    }
+                )
 
     log_page_view(user) # log the page view
-    return render_template('user-pwid.html', user=user)
+    return render_template('user-pwid.html', user=user, users=users)
 
 
 @app.route('/user-caretaker')
@@ -402,11 +411,24 @@ def user_pwid():
 def user_caretaker():
     '''caretaker table csv page'''
     user = get_current_user()
-    if not user:
-        return redirect(url_for('login'))
+
+    users = []
+    with shelve.open(ADMIN_SHELVE_NAME) as db:
+        for key in db:
+            u = db[key]
+            # check if caretaker
+            if u.get_user_type() == 'Caretaker':
+                users.append(
+                    {
+                        'username': u.get_username(),
+                        'email': u.get_email(),
+                        'created_at': u.get_creation_date().strftime('%Y-%m-%d'), # format date
+                        'page_views': u.get_page_views()
+                    }
+                )
 
     log_page_view(user) # log the page view
-    return render_template('user-caretaker.html', user=user)
+    return render_template('user-caretaker.html', user=user, users=users)
 
 
 @app.route('/edit-profile', methods=['GET', 'POST'])
@@ -414,8 +436,6 @@ def user_caretaker():
 def edit_profile():
     '''edit user profile page'''
     user = get_current_user()
-    if not user:
-        return redirect(url_for('login'))
 
     if request.method=='POST':
         updated = False
@@ -473,7 +493,46 @@ def edit_profile():
     return render_template('edit-userprofile.html', user=user)
 
 
+@app.route('/delete-account', methods=['GET', 'POST'])
+@admin_required
+def delete_account():
+    '''delete account confirmation'''
+    user = get_current_user()
 
+    if request.method == 'POST':
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        email = session.get('email')
+
+        # check if passwords match
+        if password != confirm_password:
+            flash('Passwords do not match', 'danger')
+            return redirect(url_for('delete_account'))
+        
+        # verify password against db
+        with shelve.open(ADMIN_SHELVE_NAME) as db:
+            if email in db:
+                admin = db[email]
+                if admin.get_password() == password:
+                    # Password matches, proceed to delete
+
+                    # delete user from shelve
+                    del db[email]
+
+                    # clear session
+                    session.clear()
+
+                    flash('Account successfully deleted', 'success')
+                    return redirect(url_for('login'))
+                else:
+                    flash('Incorrect password.', 'danger')
+                    return redirect(url_for('delete_account'))
+            else:
+                flash('ERROR', 'danger')
+                return redirect(url_for('delete_account'))
+    
+    log_page_view(user) # log the page view
+    return render_template('delete-account.html', user=user)
 
 if __name__ == '__main__':
     app.run(debug=True)

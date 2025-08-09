@@ -15,6 +15,7 @@
   <!-- [Favicon] icon -->
   <link rel="icon" href="{{ url_for('static', filename = 'images/favicon.svg') }}" type="image/x-icon"><!-- [Google Font] Family -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" id="main-font-link">
+  
   <!-- [Tabler Icons] https://tablericons.com -->
   <link rel="stylesheet" href="{{ url_for('static', filename='fonts/tabler-icons.min.css') }}" >
   <!-- [Feather Icons] https://feathericons.com -->
@@ -34,6 +35,10 @@
 </head>
 <!-- [Head] end -->
 
+<!-- page-specific-CSS -->
+    {% block css %}
+    {% endblock %}
+
 <!-- page-specific-JS -->
     {% block scripts %}
     {% endblock %}
@@ -50,7 +55,7 @@
     <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1050; min-width: 300px;">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            {% for category, message in messages %}
+            {% for category, message in messages[:3] %}
             <div id="flash-message" class="alert alert-{{ category }} alert-dismissible fade show shadow" role="alert">
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
