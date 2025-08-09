@@ -17,7 +17,7 @@ Template used is the Mantis Bootstrap 5 Admin Template from CodedThemes.
 ## Dependencies:
 - flask
 - flask_mail
-- python-magic
+- python-magic-bin
 - itsdangerous
 - python-dotenv
 - Werkzeug  
