@@ -21,4 +21,4 @@ Template used is the Mantis Bootstrap 5 Admin Template from CodedThemes.
 - itsdangerous
 - python-dotenv
 - Werkzeug
-may be more that i missed
+  may be more that i missed
