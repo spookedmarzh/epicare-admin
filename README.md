@@ -14,11 +14,10 @@ Template used is the Mantis Bootstrap 5 Admin Template from CodedThemes.
 - added table for the PWID & Caretaker page with export to csv, excel and print option
 - Delete account
 
-## Dependencies
+## Dependencies (may be more that i missed)
 - flask
 - flask_mail
 - python-magic
 - itsdangerous
 - python-dotenv
 - Werkzeug
-  may be more that i missed
