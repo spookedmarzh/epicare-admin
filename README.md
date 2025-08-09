@@ -31,5 +31,5 @@ MAIL_USERNAME=
 MAIL_PASSWORD=  
 MAIL_DEFAULT_SENDER=  
 
-###Create a file 'page_views.csv'
+###Create a file 'page_views.csv'  
 timestamp,user_type --> put this in the first row of the file
