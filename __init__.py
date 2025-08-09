@@ -5,6 +5,7 @@ import shelve
 from datetime import timedelta, datetime
 import uuid
 import csv
+from functools import wraps
 
 # Third-party library imports
 from flask import Flask, render_template, request, jsonify, redirect, flash, url_for, session
@@ -114,6 +115,37 @@ def get_current_user():
 
     return user
 
+
+# Decorator to ensure a user is logged in AND has the 'Admin' role
+def admin_required(f):
+    # @wraps(f) preserves the original function's name, docstring, etc.
+    # Without it, Flask's routing, debugging, and help() might break or show "decorated_function" instead of the original.
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        """
+        This inner function is what actually runs instead of your route
+        when you apply @admin_required on it.
+        """
+
+        # 1. Check if the user is logged in (session stores their email after login)
+        if 'email' not in session:
+            flash("Please log in to access this page.", "warning")
+            return redirect(url_for('login'))
+
+        # 2. Check if the logged-in user is an Admin
+        with shelve.open(ADMIN_SHELVE_NAME) as db:
+            admin = db.get(session['email'])
+            # Reject if the user doesn't exist OR is not an Admin
+            if not admin or admin.get_user_type() != 'Admin':
+                flash("You do not have permission to view this page.", "danger")
+                return redirect(url_for('home'))
+
+        # 3. If all checks pass, run the original route function
+        return f(*args, **kwargs)
+
+    return decorated_function  # This replaces your route function when decorated
+
+
 def get_user_counts():
     counts = {
         'PWID': 0,
@@ -129,6 +161,20 @@ def get_user_counts():
                 counts['Caretaker'] += 1
         
         return counts
+    
+def get_total_page_views_current_year(year_offset=0):
+    """Returns total page views for a given year offset."""
+
+    target_year = datetime.now().year - year_offset
+    count = 0
+
+    with open(LOG_FILE, newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            ts = datetime.fromisoformat(row['timestamp'])
+            if ts.year == target_year:
+                count += 1
+    return count
 
 # ─────────── Routes ───────────
 
@@ -286,6 +332,7 @@ def reset_password(token):
 # ─────────── Content Routes (Authenticated) ───────────
 
 @app.route('/')
+@admin_required
 def home():
     '''Home/Dashboard page (page user logs into)'''
 
@@ -301,7 +348,20 @@ def home():
     return render_template('home.html', user=user)
 
 
+
+@app.route('/total-pageview-data')
+@admin_required
+def total_pageview_data():
+    '''retrieves total page views'''
+
+    current_year_views = get_total_page_views_current_year()
+    previous_year_views = get_total_page_views_current_year(1) or 0
+    return jsonify({"current_year": current_year_views,
+                    "last_year": previous_year_views})
+
+
 @app.route('/pageview-data')
+@admin_required
 def pageview_data():
     '''retrieve the chart data'''
 
@@ -314,12 +374,19 @@ def pageview_data():
 
 
 @app.route('/usercount-data')
+@admin_required
 def usercount_data():
     counts = get_user_counts()
-    return jsonify(counts)
+    total_users = counts['PWID'] + counts['Caretaker']
+    return jsonify({
+        'Total_users' : total_users,
+        'PWID': counts['PWID'],
+        'Caretaker': counts['Caretaker']
+    })
 
 
 @app.route('/user-pwid')
+@admin_required
 def user_pwid():
     '''pwid table csv page'''
     user = get_current_user()
@@ -331,6 +398,7 @@ def user_pwid():
 
 
 @app.route('/user-caretaker')
+@admin_required
 def user_caretaker():
     '''caretaker table csv page'''
     user = get_current_user()
@@ -342,6 +410,7 @@ def user_caretaker():
 
 
 @app.route('/edit-profile', methods=['GET', 'POST'])
+@admin_required
 def edit_profile():
     '''edit user profile page'''
     user = get_current_user()

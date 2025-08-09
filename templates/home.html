@@ -6,6 +6,65 @@
 <!-- [Page Specific JS] start -->
 <script src="{{ url_for('static', filename='js/plugins/apexcharts.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/pages/dashboard-default.js') }}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  fetch('/total-pageview-data')
+    .then(response => {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
+    .then(data => {
+      const current = data.current_year || 0;
+      const previous = data.last_year || 0;
+
+      // Calculate growth percentage
+      let growthPercent;
+      if (previous === 0) {
+        growthPercent = current > 0 ? 100 : 0; // if no last year data
+      } else {
+        growthPercent = ((current - previous) / previous) * 100;
+      }
+
+      // Update total views
+      document.querySelector('#total-pageviews').textContent =
+        current.toLocaleString();
+
+      // Update growth badge
+      const growthBadge = document.querySelector('#total-pageviews-growth');
+      growthBadge.innerHTML = `
+        <i class="ti ti-trending-${growthPercent >= 0 ? 'up' : 'down'}"></i>
+        ${growthPercent.toFixed(1)}%
+      `;
+      growthBadge.className =
+        `badge border ${growthPercent >= 0 ? 'bg-light-primary border-primary' : 'bg-light-danger border-danger'}`;
+    })
+    .catch(error => {
+      console.error('Error fetching total views:', error);
+      document.querySelector('#total-pageviews').textContent = 'Error';
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+  fetch('/usercount-data')
+    .then(response => {
+      if (!response.ok) throw new Error('Network response not ok');
+      return response.json();
+    })
+    .then(data => {
+      document.querySelectorAll('.total-users').forEach(el => {
+        el.textContent = data.Total_users.toLocaleString();
+      });
+    })
+    .catch(err => {
+      console.error('Failed to load total users:', err);
+      document.querySelectorAll('.total-users').forEach(el => {
+        el.textContent = 'Error';
+      });
+    });
+});
+
+</script>
 {% endblock %}
 
 {% block content %}
@@ -37,9 +96,8 @@
           <div class="card">
             <div class="card-body">
               <h6 class="mb-2 f-w-400 text-muted">Total Page Views</h6>
-              <h4 class="mb-3">4,42,236 <span class="badge bg-light-primary border border-primary"><i
-                    class="ti ti-trending-up"></i> 59.3%</span></h4>
-              <p class="mb-0 text-muted text-sm">You made an extra <span class="text-primary">35,000</span> this year
+              <h4 class="mb-3" id="total-pageviews">Loading...</h4>
+              <p class="mb-0 text-muted text-sm">You made an extra <span class="text-primary" id="total-pageviews-growth">Loading...</span> this year
               </p>
             </div>
           </div>
@@ -48,34 +106,11 @@
           <div class="card">
             <div class="card-body">
               <h6 class="mb-2 f-w-400 text-muted">Total Users</h6>
-              <h4 class="mb-3">78,250 <span class="badge bg-light-success border border-success"><i
-                    class="ti ti-trending-up"></i> 70.5%</span></h4>
-              <p class="mb-0 text-muted text-sm">You made an extra <span class="text-success">8,900</span> this year</p>
+              <h4 class="mb-3 total-users">Loading...</h4>
+              <p class="mb-0 text-muted text-sm">&nbsp;<span class="text-success"></span></p>
             </div>
           </div>
         </div>
-        <div class="col-md-6 col-xl-3">
-          <div class="card">
-            <div class="card-body">
-              <h6 class="mb-2 f-w-400 text-muted">Total Order</h6>
-              <h4 class="mb-3">18,800 <span class="badge bg-light-warning border border-warning"><i
-                    class="ti ti-trending-down"></i> 27.4%</span></h4>
-              <p class="mb-0 text-muted text-sm">You made an extra <span class="text-warning">1,943</span> this year</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-          <div class="card">
-            <div class="card-body">
-              <h6 class="mb-2 f-w-400 text-muted">Total Sales</h6>
-              <h4 class="mb-3">$35,078 <span class="badge bg-light-danger border border-danger"><i
-                    class="ti ti-trending-down"></i> 27.4%</span></h4>
-              <p class="mb-0 text-muted text-sm">You made an extra <span class="text-danger">$20,395</span> this year
-              </p>
-            </div>
-          </div>
-        </div>
-
         <div class="col-md-12 col-xl-8">
           <div class="d-flex align-items-center justify-content-between mb-3">
             <h5 class="mb-0">Page Views</h5>
@@ -87,11 +122,11 @@
           </div>
         </div>
         <div class="col-md-12 col-xl-4">
-          <h5 class="mb-3">Income Overview</h5>
+          <h5 class="mb-3">Audience Comparison</h5>
           <div class="card">
             <div class="card-body">
-              <h6 class="mb-2 f-w-400 text-muted">This Week Statistics</h6>
-              <h3 class="mb-3">$7,650</h3>
+              <h6 class="mb-2 f-w-400 text-muted">User Count</h6>
+              <h3 class="mb-3 total-users">Loading...</h3>
               <div id="usercount-compare"></div>
             </div>
           </div>
